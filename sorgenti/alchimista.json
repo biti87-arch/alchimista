@@ -1,5 +1,5 @@
 {
- "fonte": "Alchimista_v2.4.1_FINALE.docx",
+ "fonte": "Alchimista_v2.4.2_FINALE.docx",
  "tabella": [
   {
    "liv": 1,
@@ -3150,7 +3150,7 @@
     {
      "v": "2.0",
      "liv": 14,
-     "testo": "Come il mutageno Rigenerante (Liv. 10), ma il fruitore si cura di 7d8 +1 danni per livello (massimo +35) e la finestra utile per annullare le Ferite gravi e le relative menomazioni permanenti sale a 3 round dall’evento. L’effetto è istantaneo. Una creatura può beneficiare di un solo mutageno Rigenerante (di qualsiasi versione) al giorno.",
+     "testo": "Come la versione 1.0 ma il fruitore si cura di 7d8 +1 danni per livello (massimo +35) e la finestra utile per annullare le Ferite gravi e le relative menomazioni permanenti sale a 3 round dall’evento.",
      "tag": [
       "giornaliero"
      ],
@@ -6691,7 +6691,7 @@
     {
      "nome": "Percorso specialistico",
      "testo": [
-      "Un batteriologo deve scegliere Tossicologo come campo di ricerca. Inoltre, non può mai aggiungere al proprio formulario le formule delle bombe alchemiche."
+      "Al 1° livello, un batteriologo deve scegliere tossicologo come campo di ricerca. Inoltre, non può mai aggiungere al proprio formulario le formule delle bombe alchemiche."
      ],
      "dicitura": "Privilegi di classe modificati: Campo di ricerca al 1° livello e Oggetti alchemici al 1° livello."
     },

@@ -1,4 +1,4 @@
-"""Legge txt/Alchimista_v2.4.1_FINALE.json (da estrai_testo.py) e scrive alchimista.json.
+"""Legge txt/Alchimista_v2.4.x_FINALE.json (da estrai_testo.py) e scrive alchimista.json.
 I controlli in fondo verificano i conteggi: se il manuale cambia struttura, lo script si ferma."""
 import json, re, os, sys
 R = os.path.dirname(os.path.abspath(__file__))
@@ -96,7 +96,7 @@ def sezione_regole(a, b):
     for i in range(a, b):
         if not T[i] or P[i]['c']:
             continue
-        if P[i]['o'] and not P[i]['h']:
+        if P[i]['o']:  # sottotitolo arancione (dalla v2.4.2 anche con «mantieni con il successivo»)
             out.append({'nome': T[i], 'testo': []})
         elif out:
             out[-1]['testo'].append(T[i])
@@ -205,13 +205,7 @@ for h, tt in mutageni:
     x = leggi_mutageno(h, tt)
     if x:
         mut.append(x)
-# Rigenerante 2.0 è una voce separata: diventa la versione 2.0 di Rigenerante
-r1 = next(x for x in mut if x['nome'] == 'Rigenerante')
-r2 = next(x for x in mut if x['nome'] == 'Rigenerante 2.0')
-r1['versioni'][0]['v'] = '1.0'
-v2 = r2['versioni'][0]; v2['v'] = '2.0'
-r1['versioni'].append(v2); r1['livelli'].append(v2['liv'])
-mut.remove(r2)
+# Rigenerante: dalla v2.4.2 del manuale è una voce sola con 1.0 e 2.0 (prima erano due voci)
 
 # tabella dei mutageni (per controllo incrociato dei livelli)
 tabm = {}

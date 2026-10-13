@@ -6,7 +6,7 @@
 
 Alchimista
 Accademie, club e organizzazioni varie
-Vol. 2 — Classi   ·   Revisione 2.4.1
+Vol. 2 — Classi   ·   Revisione 2.4.2
 “E’ solo una punturina Slappen… Fidati, non ti farà nulla. Nulla…”
 − Kriknak Moulder
 
@@ -371,10 +371,11 @@ Protettivo 1.0
 Scudo energetico 1.0
 Vigile
 Rinvigorente 1.0
-Tentacolare 1.0
+Tentacolare
 
 Salutare 1.0
 Valoroso 1.0
+
 
 Livello oggetto 8
 Livello oggetto 10
@@ -419,7 +420,7 @@ Predatorio
 Riflettente
 
 Ristoratore 2.0
-Rigenerante
+Rigenerante 1.0
 
 Salutare 2.0
 Telepatico
@@ -428,6 +429,7 @@ Salvavita
 Valoroso 2.0
 
 Svincolante
+
 
 
 Livello oggetto 14
@@ -654,10 +656,9 @@ Riciclante [concentrato, giornaliero] (Liv. 12)
 Il fruitore si cura tramite l’energia positiva di 3d8 danni +1 per livello.
 Riflettente (Liv. 10)
 La pelle del fruitore diventa madreperlacea e speculare. La prima volta ogni round che il fruitore è bersaglio di un incantesimo che richiede un tiro per colpire a distanza (raggio, dardo o attacco di contatto a distanza) e questo lo manca oppure lui ne supera il Tiro Salvezza, l’incantesimo viene riflesso sul lanciatore (che può evitarlo con una prova di livello dell’incantatore contrapposta). L’effetto dura 1 round per livello.
-Rigenerante [giornaliero] (Liv. 10)
-Il fruitore si cura tramite l’energia positiva di 5d8 +1 danni per livello (massimo +25). Inoltre, se questo mutageno viene inoculato entro 1 round da quando il fruitore ha subito una Ferita grave, guarisce istantaneamente tutte le Ferite gravi e le emorragie che lo affliggono a prescindere dalla loro entità (gravità 1, 2, 3, emorragia lieve o grave), comprese le menomazioni permanenti da esse derivate (amputazioni, arti inutilizzabili, organi compromessi, penalità permanenti). L’effetto è istantaneo. Una creatura può beneficiare di un solo mutageno Rigenerante (di qualsiasi versione) al giorno.
-Rigenerante 2.0 [giornaliero] (Liv. 14)
-Come il mutageno Rigenerante (Liv. 10), ma il fruitore si cura di 7d8 +1 danni per livello (massimo +35) e la finestra utile per annullare le Ferite gravi e le relative menomazioni permanenti sale a 3 round dall’evento. L’effetto è istantaneo. Una creatura può beneficiare di un solo mutageno Rigenerante (di qualsiasi versione) al giorno.
+Rigenerante [giornaliero] (Liv. 10, 14)
+1.0: Il fruitore si cura tramite l’energia positiva di 5d8 +1 danni per livello (massimo +25). Inoltre, se questo mutageno viene inoculato entro 1 round da quando il fruitore ha subito una Ferita grave, guarisce istantaneamente tutte le Ferite gravi e le emorragie che lo affliggono a prescindere dalla loro entità (gravità 1, 2, 3, emorragia lieve o grave), comprese le menomazioni permanenti da esse derivate (amputazioni, arti inutilizzabili, organi compromessi, penalità permanenti). L’effetto è istantaneo. Una creatura può beneficiare di un solo mutageno Rigenerante (di qualsiasi versione) al giorno.
+2.0: Come la versione 1.0 ma il fruitore si cura di 7d8 +1 danni per livello (massimo +35) e la finestra utile per annullare le Ferite gravi e le relative menomazioni permanenti sale a 3 round dall’evento.
 Rinvigorente [concentrato] (Liv. 1, 6)
 1.0: Questo mutageno può essere inoculato a un massimo di 3 creature. Dopo 3 round dall’inoculazione, il mutageno rimuove 1 danno temporaneo a una singola caratteristica di ciascun fruitore.
 2.0: Come la versione 1.0 ma il mutageno rimuove 2 danni temporanei a una singola caratteristica o 1 danno temporaneo a due diverse caratteristiche di ciascun fruitore.
@@ -1679,7 +1680,7 @@ Privilegio di classe sostituito: Dote da alchimista al 4° livello.
 Batteriologo
 Un batteriologo considera le malattie come l'arma definitiva e lavora senza sosta su cavie più meno consenzienti per padroneggiare nuovi agenti patogeni e subdoli sistemi per propagarli. Un batteriologo non prova più rimorso nello scatenare il suo letale armamento, di quello che prova un arciere nello scoccare una freccia.
 Percorso specialistico
-Un batteriologo deve scegliere Tossicologo come campo di ricerca. Inoltre, non può mai aggiungere al proprio formulario le formule delle bombe alchemiche.
+Al 1° livello, un batteriologo deve scegliere tossicologo come campo di ricerca. Inoltre, non può mai aggiungere al proprio formulario le formule delle bombe alchemiche.
 Privilegi di classe modificati: Campo di ricerca al 1° livello e Oggetti alchemici al 1° livello.
 Coltura batteriologica estensiva
 Le creature viventi immuni agli effetti di [VELENO] ottengono il consueto bonus di +3 al Tiro Salvezza contro i veleni di un batteriologo solo se sono immuni anche agli effetti di [MALATTIA].
