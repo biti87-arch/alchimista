@@ -1,0 +1,7 @@
+{
+  "appId": "it.collana.alchimista",
+  "appName": "Laboratorio Alchemico",
+  "webDir": "www",
+  "android": { "allowMixedContent": false },
+  "plugins": { "CapacitorHttp": { "enabled": true } }
+}

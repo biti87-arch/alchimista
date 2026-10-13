@@ -1,0 +1,833 @@
+<title>Laboratorio Alchemico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral+SC:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: colonna unica da banco di laboratorio, schede a etichetta; il colore distingue bombe, mutageni e veleni. */
+:root{
+  --bg:#EDF0EB; --surface:#F9FAF7; --surface2:#E0E5DD; --line:#C6CDC3;
+  --ink:#19201B; --muted:#5A645C; --accent:#1F5E57; --accent-ink:#FFFFFF; --brass:#80601F;
+  --bomb:#A2461B; --mut:#1F6E62; --vel:#6A3E8C;
+  --cond:#B3121B; --good:#2E6B4A; --warn:#9A5B12; --adv:#1E7A1E; --mark:#E2E9DC;
+  --f-display:"Spectral SC", Georgia, "Times New Roman", serif;
+  --f-body:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#111513; --surface:#191F1C; --surface2:#242C28; --line:#35403A;
+    --ink:#E5EAE5; --muted:#99A49C; --accent:#6CC2B3; --accent-ink:#0B1916; --brass:#D2AE66;
+    --bomb:#E8915F; --mut:#6CC2B3; --vel:#C59EE6;
+    --cond:#FF6B6B; --good:#7CC79B; --warn:#E3A55A; --adv:#5FBF5F; --mark:#21302A; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#111513; --surface:#191F1C; --surface2:#242C28; --line:#35403A;
+  --ink:#E5EAE5; --muted:#99A49C; --accent:#6CC2B3; --accent-ink:#0B1916; --brass:#D2AE66;
+  --bomb:#E8915F; --mut:#6CC2B3; --vel:#C59EE6;
+  --cond:#FF6B6B; --good:#7CC79B; --warn:#E3A55A; --adv:#5FBF5F; --mark:#21302A; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{overflow-x:hidden}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45;padding:0 16px 80px}
+.wrap{max-width:760px;margin:0 auto;min-width:0}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:12px 8px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+h1{font-family:var(--f-display);font-weight:700;font-size:1.4rem;margin:0;letter-spacing:.02em;text-wrap:balance}
+.pg{display:flex;gap:6px;align-items:center;min-width:0}
+.pg select{max-width:46vw;padding:6px 8px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--ink);font:600 .85rem var(--f-body)}
+.hsub{color:var(--muted);font-size:.8rem;margin-top:4px;font-variant-numeric:tabular-nums}
+nav.tabs{display:flex;gap:4px;margin-top:10px}
+nav.tabs button{flex:1;padding:9px 6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;font:600 .82rem var(--f-body);cursor:pointer}
+nav.tabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+section.panel{display:grid;gap:16px;padding-top:16px}
+h2{font-family:var(--f-display);font-weight:500;font-size:1.12rem;margin:0 0 8px;letter-spacing:.03em;color:var(--brass);text-wrap:balance}
+h3{font-size:.95rem;margin:0}
+.label{font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;min-width:0}
+.hrow{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.hrow h2{margin:0}
+.stack{display:grid;gap:10px}
+.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
+.field{display:grid;gap:3px;min-width:0}
+.field input,.field select{width:100%;padding:7px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);font:500 .95rem var(--f-mono)}
+.field select{font-family:var(--f-body);font-size:.9rem}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{padding:7px 12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:7px;font:600 .85rem var(--f-body);cursor:pointer}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.sm{padding:4px 9px;font-size:.8rem}
+.btn.danger{color:var(--cond);border-color:var(--cond)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.seg{display:flex;gap:4px;flex-wrap:wrap}
+.seg button{flex:1;padding:7px 6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:7px;font:600 .82rem var(--f-body);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.seg button:disabled{opacity:.45}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font:500 .8rem var(--f-body);cursor:pointer;color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip.lock{border-style:dashed;cursor:default}
+.chip.lock[aria-pressed="true"]{background:var(--brass);border-color:var(--brass);color:var(--surface)}
+.chip:disabled{opacity:.4;cursor:not-allowed}
+.chip.num{font-family:var(--f-mono);min-width:38px;text-align:center}
+.tag{font:500 .68rem var(--f-mono);padding:2px 6px;border-radius:4px;background:var(--surface2);color:var(--muted);white-space:nowrap;text-transform:uppercase;letter-spacing:.04em}
+.tag.B{background:var(--bomb);color:var(--surface)}
+.tag.M{background:var(--mut);color:var(--surface)}
+.tag.V{background:var(--vel);color:var(--surface)}
+.tag.G{background:var(--brass);color:var(--surface)}
+.tag.no{background:transparent;border:1px solid var(--warn);color:var(--warn)}
+.tag.ok{background:transparent;border:1px solid var(--good);color:var(--good)}
+.kv{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:8px}
+.kv div{background:var(--bg);border-radius:8px;padding:8px 10px;min-width:0}
+.kv b{display:block;font:500 1.1rem var(--f-mono);font-variant-numeric:tabular-nums}
+.kv small{display:block;color:var(--muted);font-size:.72rem}
+.txt{font-size:.9rem;min-width:0}
+.txt p{margin:4px 0}
+.note{font-size:.82rem;color:var(--muted)}
+.banner{background:var(--mark);border-radius:8px;padding:8px 12px;font-size:.85rem}
+.banner.warn{background:transparent;border:1px solid var(--warn);color:var(--warn)}
+.banner ul{margin:4px 0 0;padding-left:18px}
+.cond{color:var(--cond);font-weight:600}
+.adv{background:var(--adv);color:#fff;padding:0 3px;border-radius:3px}
+.dis{background:var(--cond);color:#fff;padding:0 3px;border-radius:3px}
+.etq{font:600 .78rem var(--f-mono);color:var(--brass)}
+details{border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:8px 10px;min-width:0}
+details+details{margin-top:6px}
+details summary{cursor:pointer;font-weight:600;display:flex;justify-content:space-between;gap:8px;align-items:center;list-style:none}
+details summary::-webkit-details-marker{display:none}
+details summary::after{content:"▸";color:var(--muted);font-weight:400}
+details[open] summary::after{content:"▾"}
+details .txt{margin-top:6px}
+.it{display:grid;gap:8px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);min-width:0}
+.it .top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.it .nm{font-weight:600}
+.it .qta{font:600 1.05rem var(--f-mono);font-variant-numeric:tabular-nums}
+.ln{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed var(--line);padding-block:3px;font-size:.88rem}
+.ln span:last-child{font-family:var(--f-mono);text-align:right;font-variant-numeric:tabular-nums}
+.ctr{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.ctr b{font:600 1.02rem var(--f-mono);min-width:58px;text-align:center;font-variant-numeric:tabular-nums}
+.ctr .pips{display:flex;gap:6px;align-items:center}
+.big{font:600 2rem var(--f-mono);font-variant-numeric:tabular-nums;line-height:1}
+.esito{border:1px solid var(--accent);border-radius:8px;padding:10px 12px;background:var(--mark)}
+.esito .tot{font:600 1.6rem var(--f-mono)}
+.dadi{font:500 .8rem var(--f-mono);color:var(--muted)}
+.opt{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:start;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);min-width:0}
+.opt.bad{border-color:var(--warn)}
+.list{display:grid;gap:6px}
+.overlay{position:fixed;inset:0;background:rgba(8,12,10,.55);z-index:20;display:flex;justify-content:center;align-items:flex-end}
+.overlay .card{width:100%;max-width:760px;max-height:88vh;overflow:auto;border-radius:14px 14px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px))}
+.search{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit}
+table.t{width:100%;border-collapse:collapse;font-size:.82rem}
+table.t th,table.t td{padding:4px 5px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+table.t th{font-weight:600;color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em}
+table.t td.n{font-family:var(--f-mono);white-space:nowrap;font-variant-numeric:tabular-nums}
+table.t tr.oltre td{color:var(--muted);opacity:.6}
+.scroll{overflow-x:auto}
+.tempo{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:.85rem;z-index:30;max-width:90vw}
+@media (prefers-reduced-motion:no-preference){.esito{animation:fade .25s ease-out}@keyframes fade{from{opacity:.4}to{opacity:1}}}
+</style>
+<div class="wrap">
+<header class="top">
+  <div class="brand">
+    <h1>Laboratorio Alchemico</h1>
+    <div class="pg">
+      <select id="pgSel" aria-label="Personaggio"></select>
+      <button class="btn sm" data-a="pgNuovo" type="button">Nuovo</button>
+    </div>
+  </div>
+  <div class="hsub" id="hsub"></div>
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="scheda" type="button">Scheda</button>
+    <button role="tab" data-tab="alba" type="button">Alba</button>
+    <button role="tab" data-tab="borsa" type="button">Borsa</button>
+    <button role="tab" data-tab="manuale" type="button">Manuale</button>
+  </nav>
+</header>
+<main id="main"></main>
+<div id="ov"></div>
+<div id="toast" class="toast" hidden></div>
+</div>
+<script>__MOTORE__</script>
+<script>
+'use strict';
+const D = __DATI__;
+M.init(D);
+const KEY = 'alchimista.v1';
+const COND = ['affaticat[oaie]','esaust[oaie]','abbagliat[oaie]','accecat[oaie]','assordat[oaie]','barcollant[ei]','confus[oaie]','frastornat[oaie]',
+  'immobilizzat[oaie]','inferm[oaie]','intralciat[oaie]','nauseat[oaie]','paralizzat[oaie]','scoss[oaie]','spaventat[oaie]','pietrificat[oaie]',
+  'pron[oaie]','stordit[oaie]','offuscat[oaie]','azzoppat[oaie]','indifes[oaie]','colt[oi] alla sprovvista','impreparat[oaie]','priv[oaie] di sensi',
+  'in lotta','sanguinant[ei]','incorpore[oaie]','in preda al panico','accovacciat[oaie]','affascinat[oaie]','inabil[ei]'];
+const RCOND = new RegExp('\\b(' + COND.join('|') + ')\\b', 'gi');
+const KIND = { B: 'bomba', M: 'mutageno', V: 'veleno', C: 'cocktail' };
+
+/* ---------- stato ---------- */
+function nuovoPg(nome) {
+  return { id: 'p' + Date.now().toString(36) + Math.floor(Math.random() * 1e4), nome: nome || 'Nuovo alchimista', liv: 1, int: 3, campo: 'bombarolo', arch: '',
+    doti: [], formule: [], opz: {}, giorno: null, inv: [], eff: [], t: 0, cnt: {}, ultimo: null };
+}
+function esempio() {
+  const s = nuovoPg('Esempio: bombarolo di 5°');
+  Object.assign(s, { liv: 5, int: 4, campo: 'bombarolo', doti: ['Bombe fumogene', 'Bombe subacquee'],
+    formule: ['B|Acida|1', 'B|Acida|3', 'B|Acida|5', 'B|Incendiaria|1', 'B|Incendiaria|3', 'B|Incendiaria|5', 'B|Sonica|1', 'B|Sonica|3', 'B|Folgorante|1',
+      'M|Curativo|1.0', 'M|Curativo|2.0', 'M|Antitossina|1.0', 'M|Della speditezza|', 'V|Veleno di vipera reale', 'V|Zanna di topo tigre'],
+    opz: { diluite: ['Incendiaria'] } });
+  return s;
+}
+let G;
+try { const r = localStorage.getItem(KEY); if (r) G = JSON.parse(r); } catch (e) { G = null; }
+if (!G || !G.pg || !G.pg[G.attivo]) { const s = esempio(); G = { attivo: s.id, pg: { [s.id]: s }, tab: 'scheda' }; }
+let S = G.pg[G.attivo];
+const UI = { filtroDoti: 'tutte', cercaDoti: '', soloDisp: true, cercaMut: '', man: 'tutto', cercaMan: '', prep: null, rapida: null, conferma: null, inocula: {}, bersaglio: {}, gas: {} };
+function save() { G.pg[G.attivo] = S; try { localStorage.setItem(KEY, JSON.stringify(G)); } catch (e) {} }
+function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 2600); }
+
+/* ---------- testo ---------- */
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+function fmt(s) {
+  return esc(s).replace(RCOND, m => '<span class="cond">' + m + '</span>')
+    .replace(/\b(vantaggio)\b/gi, '<span class="adv">$1</span>').replace(/\b(svantaggio)\b/gi, '<span class="dis">$1</span>');
+}
+function paras(lista) {
+  return (lista || []).map(x => {
+    if (typeof x === 'string') {
+      const m = x.match(/^([A-ZÀ-Ü][\wà-ü’' ()]{1,40}):\s(.*)$/s);
+      return m && m[1].length < 40 ? `<p><b>${esc(m[1])}:</b> ${fmt(m[2])}</p>` : `<p>${fmt(x)}</p>`;
+    }
+    return `<div class="scroll"><table class="t">${x.tab.map((r, i) => '<tr>' + r.map(c => i ? `<td>${fmt(c)}</td>` : `<th>${esc(c)}</th>`).join('') + '</tr>').join('')}</table></div>`;
+  }).join('');
+}
+const segno = n => (n >= 0 ? '+' : '') + n;
+const ord = n => n + '°';
+
+/* ---------- intestazione ---------- */
+function header() {
+  const sel = document.getElementById('pgSel');
+  sel.innerHTML = Object.values(G.pg).map(p => `<option value="${p.id}"${p.id === S.id ? ' selected' : ''}>${esc(p.nome)}</option>`).join('');
+  const c = M.campo(S);
+  const rg = S.giorno ? `Reagenti ${S.giorno.reag}` : 'Nessuna alba';
+  document.getElementById('hsub').textContent = `${S.arch || (c ? c[0].toUpperCase() + c.slice(1) : 'Alchimista')} · ${ord(S.liv)} livello · Int ${segno(S.int)} · ${rg} · ${tempoTxt(S.t)}`;
+  document.querySelectorAll('nav.tabs button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === G.tab)));
+}
+function tempoTxt(t) { return 'tempo ' + (t > 0 ? M.fmtDurata(t, 'ore') : '0 round'); }
+
+/* ================= SCHEDA ================= */
+function vScheda() {
+  const c = M.campo(S), ad = M.archDati(S), a = M.arch(S);
+  const forz = !!(ad && ad.campo);
+  const W = M.validaFormulario(S);
+  const dW = verificaDoti();
+  let h = `<div class="card stack"><h2>Personaggio</h2>
+  <div class="grid">
+    <label class="field"><span class="label">Nome</span><input id="f-nome" data-f="nome" value="${esc(S.nome)}"></label>
+    <label class="field"><span class="label">Livello</span><select id="f-liv" data-f="liv">${Array.from({ length: 20 }, (_, i) => `<option${i + 1 === S.liv ? ' selected' : ''}>${i + 1}</option>`).join('')}</select></label>
+    <label class="field"><span class="label">Bonus di Int</span><input id="f-int" data-f="int" type="number" inputmode="numeric" min="-5" max="15" value="${S.int}"></label>
+  </div>
+  <div class="field"><span class="label">Archetipo</span><select id="f-arch" data-f="arch"><option value="">Nessuno</option>${D.archetipi.map(x => `<option${x.nome === S.arch ? ' selected' : ''}>${esc(x.nome)}</option>`).join('')}</select></div>
+  <div class="field"><span class="label">Campo di ricerca${forz ? ' (imposto dall’archetipo)' : ''}</span>
+    <div class="seg">${M.CAMPI.map(x => `<button type="button" data-a="campo" data-v="${x}" aria-pressed="${x === c}"${forz ? ' disabled' : ''}>${x[0].toUpperCase() + x.slice(1)}</button>`).join('')}</div></div>
+  ${a.sceltaEsclusione ? `<div class="field"><span class="label">Mescicure: tipo di oggetto escluso dal formulario</span><div class="seg">
+     ${[['B', 'Bombe'], ['V', 'Veleni']].map(([k, n]) => `<button type="button" data-a="opz" data-k="escludi" data-v="${k}" aria-pressed="${(S.opz.escludi || '') === k}">${n}</button>`).join('')}</div></div>` : ''}
+  </div>`;
+  h += riepilogo();
+  h += cardDoti(dW);
+  h += cardFormulario(W);
+  h += cardOpzioni();
+  h += cardPrivilegi();
+  return h;
+}
+function riepilogo() {
+  const inib = M.inibitoriMax(S);
+  const cdCap = 10 + Math.floor(S.liv / 2) + S.int;
+  const ta = (M.haDote(S, 'Tossicità aumentata') ? 1 : 0) + (M.haDote(S, 'Tossicità aumentata superiore') ? 1 : 0);
+  const furt = M.attaccoFurtivo(S);
+  const tiles = [
+    [M.reagentiGiorno(S), 'reagenti al giorno' + (S.liv >= 20 ? ' (+2d4+2)' : '')],
+    [inib === Infinity ? '∞' : inib, 'agenti inibitori'],
+    ['10+tox' + segno(S.int + ta), 'CD dei veleni'],
+    [cdCap, 'CD capacità (10 + ½ liv + Int)'],
+    [M.livMutageni(S), 'livello per i mutageni'],
+    [M.maxFruitori(S), 'fruitori dei concentrati'],
+  ];
+  if (M.haDote(S, 'Bombe potenti')) tiles.push([segno(M.mezzoInt(S.int)), 'Bombe potenti' + (S.arch === 'Piromane' ? ' (incendiarie)' : '')]);
+  if (furt) tiles.push([furt + 'd6', 'attacco furtivo']);
+  if (S.liv >= 15) tiles.push([cdCap, 'CD Sangue nauseabondo']);
+  if (S.liv >= 9) tiles.push([2 * S.liv, 'PF di Bio-reazione']);
+  return `<div class="card"><h2>Riepilogo</h2><div class="kv">${tiles.map(([b, s]) => `<div><b>${esc(b)}</b><small>${esc(s)}</small></div>`).join('')}</div></div>`;
+}
+function verificaDoti() {
+  const W = [];
+  const slot = M.slotDoti(S);
+  if (S.doti.length > slot.length) W.push(`Doti scelte: ${S.doti.length}, posti disponibili: ${slot.length}.`);
+  for (const n of [...new Set(S.doti)]) {
+    const d = M.dote(n); if (!d) { W.push(`${n}: dote sconosciuta.`); continue; }
+    const r = M.requisiti(S, d);
+    if (!r.ok) W.push(`${n}: requisiti non soddisfatti (${r.no.join('; ')}).`);
+  }
+  return W;
+}
+function catTag(c) { return { bombe: '<span class="tag B">bombe</span>', mutageni: '<span class="tag M">mutageni</span>', veleni: '<span class="tag V">veleni</span>', generiche: '<span class="tag G">generica</span>', ladro: '<span class="tag">ladro</span>' }[c] || ''; }
+function cardDoti(W) {
+  const slot = M.slotDoti(S);
+  const auto = M.dotiAuto(S);
+  const ad = M.archDati(S);
+  let h = `<div class="card stack"><div class="hrow"><h2>Doti</h2><span class="etq">${S.doti.length} / ${slot.length} posti</span></div>`;
+  if (slot.length) h += `<div class="note">Posti dote ai livelli ${slot.map(ord).join(', ')}${ad && ad.doti_sostituite.length ? ` (l’archetipo sostituisce ${ad.doti_sostituite.map(ord).join(', ')})` : ''}.</div>`;
+  if (auto.length) h += `<div class="list">${auto.map(d => `<div class="opt"><div><b>${esc(d.nome)}</b> ${catTag((M.dote(d.nome) || {}).cat)}<div class="note">${esc(d.fonte)}</div></div><span class="tag ok">ottenuta</span></div>`).join('')}</div>`;
+  if (S.doti.length) h += `<div class="list">${S.doti.map((n, i) => {
+    const d = M.dote(n); const r = d ? M.requisiti(S, d) : { ok: true, ver: [] };
+    return `<div class="opt${r.ok ? '' : ' bad'}"><div><b>${esc(n)}</b> ${d ? catTag(d.cat) : catTag('ladro')} ${d && d.mod != null ? `<span class="tag">modifica +${d.mod}</span>` : ''}${d && d.pot != null ? `<span class="tag">potenziamento +${d.pot}</span>` : ''}
+      ${r.ver && r.ver.length ? `<div class="note">Da verificare: ${esc(r.ver.join('; '))}</div>` : ''}</div>
+      <button class="btn sm" type="button" data-a="togliDote" data-i="${i}" aria-label="Togli ${esc(n)}">Togli</button></div>`;
+  }).join('')}</div>`;
+  if (W.length) h += `<div class="banner warn">${W.map(esc).join('<br>')}</div>`;
+  h += `<div class="row"><button class="btn pri" type="button" data-a="apriDoti">Aggiungi dote</button></div></div>`;
+  return h;
+}
+function overlayDoti() {
+  const f = UI.filtroDoti, q = UI.cercaDoti.toLowerCase();
+  let lista = D.doti.filter(d => !d.esclusiva || d.esclusiva === S.arch).map(d => ({ d, r: M.requisiti(S, d) }));
+  if (M.arch(S).ladro) {
+    const v = M.archDati(S).voci.find(x => x.nome === 'Doti da ladro');
+    const nomi = v ? v.testo[0].split(':').pop().replace(/\.$/, '').split(/,\s*| e /).map(s => s.trim()).filter(Boolean) : [];
+    lista = lista.concat(nomi.map(n => ({ d: { nome: n, cat: 'ladro', testo: ['Dote da ladro (vedi privilegi di classe del ladro), al posto di una dote da alchimista.'], speciale: [] }, r: { ok: true, no: [], ver: [] } })));
+  }
+  if (f !== 'tutte') lista = lista.filter(x => x.d.cat === f);
+  if (UI.soloDisp) lista = lista.filter(x => x.r.ok && (x.d.cat === 'ladro' ? !S.doti.includes(x.d.nome) : M.doteSelezionabile(S, x.d)));
+  if (q) lista = lista.filter(x => x.d.nome.toLowerCase().includes(q) || x.d.testo.join(' ').toLowerCase().includes(q));
+  const cats = [['tutte', 'Tutte'], ['bombe', 'Bombe'], ['mutageni', 'Mutageni'], ['veleni', 'Veleni'], ['generiche', 'Generiche']].concat(M.arch(S).ladro ? [['ladro', 'Da ladro']] : []);
+  return `<div class="card stack" role="dialog" aria-label="Aggiungi dote">
+    <div class="hrow"><h2>Aggiungi dote</h2><button class="btn sm" type="button" data-a="chiudi">Chiudi</button></div>
+    <input class="search" id="q-doti" data-f="cercaDoti" placeholder="Cerca per nome o testo" value="${esc(UI.cercaDoti)}">
+    <div class="chips">${cats.map(([k, n]) => `<button class="chip" type="button" data-a="filtroDoti" data-v="${k}" aria-pressed="${f === k}">${n}</button>`).join('')}
+      <button class="chip" type="button" data-a="soloDisp" aria-pressed="${UI.soloDisp}">Solo disponibili</button></div>
+    <div class="list">${lista.length ? lista.map(({ d, r }) => `<details><summary><span>${esc(d.nome)} ${catTag(d.cat)} ${d.mod != null ? `<span class="tag">mod +${d.mod}</span>` : ''}${d.pot != null ? `<span class="tag">pot +${d.pot}</span>` : ''} ${r.ok ? '' : '<span class="tag no">requisiti</span>'}</span></summary>
+      <div class="txt">${d.req ? `<p><b>Requisiti:</b> ${fmt(d.req.testo)}</p>` : ''}${paras(d.testo)}${(d.speciale || []).map(s => `<p><b>Speciale:</b> ${fmt(s)}</p>`).join('')}${(d.eccezione || []).map(s => `<p><b>Eccezione:</b> ${fmt(s)}</p>`).join('')}
+      ${r.no.length ? `<p class="warnT note">Manca: ${esc(r.no.join('; '))}</p>` : ''}${r.ver.length ? `<p class="note">Da verificare: ${esc(r.ver.join('; '))}</p>` : ''}
+      <div class="row"><button class="btn pri sm" type="button" data-a="aggDote" data-v="${esc(d.nome)}">Aggiungi</button></div></div></details>`).join('') : '<p class="note">Nessuna dote con questi filtri.</p>'}</div></div>`;
+}
+function cardFormulario(W) {
+  const F = M.formulario(S), escl = M.esclusive(S), tot = F.length, max = M.formuleConsentite(S);
+  const noT = M.tipiEsclusi(S);
+  let h = `<div class="card stack"><div class="hrow"><h2>Formulario alchemico</h2><span class="etq">${tot} / ${max} formule</span></div>
+    <div class="note">8 formule al 1° livello (almeno 2 del campo di ricerca), poi 2 a livello. Le formule esclusive dell’archetipo contano fra queste.</div>`;
+  if (W.length) h += `<div class="banner warn"><b>Da sistemare</b><ul>${W.map(w => `<li>${esc(w)}</li>`).join('')}</ul></div>`;
+  // bombe
+  if (!noT.has('B')) {
+    h += `<details open><summary><span><span class="tag B">bombe</span> Bombe alchemiche</span><span class="note">${F.filter(k => k[0] === 'B').length}</span></summary><div class="txt stack">`;
+    for (const n of M.bombeConsentite(S)) {
+      const lim = Math.min(19, M.livEffBomba(S, n));
+      const livs = []; for (let l = 1; l <= 19; l += 2) if (l <= lim || F.includes(M.chiaveB(n, l))) livs.push(l);
+      h += `<div class="row" style="justify-content:space-between"><span>${esc(n)}${M.espertoTipo(S, n) ? ' <span class="tag">esperto +1</span>' : ''}</span><span class="chips">${livs.map(l => {
+        const k = M.chiaveB(n, l), lk = escl.includes(k);
+        return `<button type="button" class="chip num${lk ? ' lock' : ''}" data-a="${lk ? '' : 'formula'}" data-k="${k}" aria-pressed="${F.includes(k)}" aria-label="${esc(n)} livello ${l}">${l}</button>`;
+      }).join('') || '<span class="note">—</span>'}</span></div>`;
+    }
+    h += `</div></details>`;
+  }
+  // mutageni
+  if (!noT.has('M')) {
+    const q = UI.cercaMut.toLowerCase();
+    const per = {};
+    for (const m of D.mutageni) {
+      if (m.esclusivo && m.esclusivo !== S.arch) continue;
+      if (q && !m.nome.toLowerCase().includes(q)) continue;
+      const vs = m.versioni.filter(v => v.liv <= S.liv || F.includes(M.chiaveM(m.nome, v.v)));
+      if (!vs.length) continue;
+      const l0 = vs[0].liv; (per[l0] = per[l0] || []).push([m, vs]);
+    }
+    h += `<details${q ? ' open' : ''}><summary><span><span class="tag M">mutageni</span> Mutageni</span><span class="note">${F.filter(k => k[0] === 'M').length}</span></summary><div class="txt stack">
+      <input class="search" id="q-mut" data-f="cercaMut" placeholder="Cerca un mutageno" value="${esc(UI.cercaMut)}">`;
+    for (const l of Object.keys(per).map(Number).sort((a, b) => a - b)) {
+      h += `<div class="label">Prima versione al livello ${l}</div>`;
+      for (const [m, vs] of per[l]) {
+        h += `<div class="row" style="justify-content:space-between"><span>${esc(m.nome)}${m.tag.length ? ' <span class="tag">' + esc(m.tag.join(', ')) + '</span>' : ''}</span><span class="chips">${vs.map(v => {
+          const k = M.chiaveM(m.nome, v.v), lk = escl.includes(k);
+          return `<button type="button" class="chip${lk ? ' lock' : ''}" data-a="${lk ? '' : 'formula'}" data-k="${esc(k)}" aria-pressed="${F.includes(k)}">${v.v ? v.v + ' · ' : ''}liv ${v.liv}</button>`;
+        }).join('')}</span></div>`;
+      }
+    }
+    h += `</div></details>`;
+  }
+  // veleni
+  if (!noT.has('V')) {
+    h += `<details><summary><span><span class="tag V">veleni</span> Veleni</span><span class="note">${F.filter(k => k[0] === 'V').length}</span></summary><div class="txt list">`;
+    for (const v of D.veleni.filter(v => v.liv <= S.liv || F.includes(M.chiaveV(v.nome)))) {
+      const k = M.chiaveV(v.nome);
+      h += `<div class="row" style="justify-content:space-between"><span>${esc(v.nome)} <span class="note">liv ${v.liv} · pot ${v.pot} · tox ${segno(v.tox)} · ${esc(v.ts)}</span></span>
+        <button type="button" class="chip" data-a="formula" data-k="${esc(k)}" aria-pressed="${F.includes(k)}">${F.includes(k) ? 'Nel formulario' : 'Aggiungi'}</button></div>`;
+    }
+    h += `</div></details>`;
+  }
+  return h + '</div>';
+}
+function cardOpzioni() {
+  const out = [];
+  const F = M.formulario(S);
+  const nd = M.diluiteMax(S);
+  if (nd) {
+    const tipi = M.tipiBombePossedute(S).filter(t => t !== 'Rovospina');
+    out.push(`<div class="field"><span class="label">Bombe diluite: ${nd === 1 ? 'tipo scelto' : 'due tipi'}</span><div class="chips">${tipi.map(t => `<button type="button" class="chip" data-a="diluita" data-v="${esc(t)}" aria-pressed="${M.diluiteTipi(S).includes(t)}">${esc(t)}</button>`).join('') || '<span class="note">Aggiungi prima una formula di bomba.</span>'}</div></div>`);
+  }
+  if (M.haDote(S, 'Mutageni economici')) {
+    const ok = F.filter(k => k[0] === 'M' && M.livFormula(k) <= S.liv - 4);
+    out.push(`<div class="field"><span class="label">Mutageni economici: 2 formule di almeno 4 livelli inferiori (×3)</span><div class="chips">${ok.map(k => `<button type="button" class="chip" data-a="economico" data-k="${esc(k)}" aria-pressed="${(S.opz.economici || []).includes(k)}">${esc(M.nomeFormula(k))}</button>`).join('') || '<span class="note">Nessuna formula adatta.</span>'}</div></div>`);
+  }
+  if (M.haDote(S, 'Nuovo mutageno concentrato')) {
+    const ok = F.filter(k => k[0] === 'M');
+    out.push(`<label class="field"><span class="label">Nuovo mutageno concentrato</span><select id="f-nconc" data-f="nuovoConc"><option value="">—</option>${ok.map(k => `<option value="${esc(k)}"${S.opz.nuovoConc === k ? ' selected' : ''}>${esc(M.nomeFormula(k))}</option>`).join('')}</select></label>`);
+  }
+  if (M.haDote(S, 'Veleno perfetto')) {
+    const ok = F.filter(k => k[0] === 'V').map(k => k.split('|')[1]);
+    out.push(`<label class="field"><span class="label">Veleno perfetto</span><select id="f-vperf" data-f="vperfetto"><option value="">—</option>${ok.map(n => `<option${S.opz.vperfetto === n ? ' selected' : ''}>${esc(n)}</option>`).join('')}</select></label>`);
+  }
+  const ne = M.contaDote(S, 'Formulario alchemico espanso');
+  for (let i = 0; i < ne; i++) {
+    const v = (S.opz.espanso || [])[i] === 2 ? 2 : 1;
+    out.push(`<div class="field"><span class="label">Formulario alchemico espanso ${ne > 1 ? '(' + (i + 1) + ')' : ''}</span><div class="seg">
+      <button type="button" data-a="espanso" data-i="${i}" data-v="1" aria-pressed="${v === 1}">1 formula del tuo livello</button>
+      <button type="button" data-a="espanso" data-i="${i}" data-v="2" aria-pressed="${v === 2}">2 formule di 4 livelli sotto</button></div></div>`);
+  }
+  return out.length ? `<div class="card stack"><h2>Scelte delle doti</h2>${out.join('')}</div>` : '';
+}
+function cardPrivilegi() {
+  const ad = M.archDati(S);
+  let h = `<div class="card stack"><h2>Privilegi</h2><div class="scroll"><table class="t"><tr><th>Liv.</th><th>BAB</th><th>Tem</th><th>Rif</th><th>Vol</th><th>Privilegi</th></tr>
+    ${D.tabella.map(r => `<tr class="${r.liv > S.liv ? 'oltre' : ''}"><td class="n">${r.liv}°</td><td class="n">${esc(r.bab)}</td><td class="n">${esc(r.tem)}</td><td class="n">${esc(r.rif)}</td><td class="n">${esc(r.vol)}</td><td>${esc(r.priv.join(', '))}</td></tr>`).join('')}</table></div>`;
+  h += D.privilegi.map(p => `<details><summary><span>${esc(p.nome)}</span></summary><div class="txt">${paras(p.testo)}</div></details>`).join('');
+  if (ad) {
+    h += `<h2 style="margin-top:8px">${esc(ad.nome)}</h2><p class="note">${fmt(ad.flavor)}</p>`;
+    if (ad.abilita) h += `<p class="txt"><b>Abilità di classe:</b> ${fmt(ad.abilita)}</p>`;
+    if (ad.competenze) h += `<p class="txt"><b>Competenze offensive:</b> ${fmt(ad.competenze)}</p>`;
+    h += ad.voci.map(v => `<details><summary><span>${esc(v.nome)}</span></summary><div class="txt">${paras(v.testo)}${v.dicitura ? `<p class="note"><i>${esc(v.dicitura)}</i></p>` : ''}</div></details>`).join('');
+    for (const k of ['M', 'B']) {
+      const lista = k === 'M' ? D.mutageni.filter(m => m.esclusivo === ad.nome) : D.bombe.filter(b => b.esclusiva === ad.nome);
+      h += lista.map(x => `<details><summary><span>${esc(x.nome)} <span class="tag ${k}">${k === 'M' ? 'mutageno' : 'bomba'} esclusivo</span></span></summary><div class="txt">${k === 'M' ? (x.comune ? `<p>${fmt(x.comune)}</p>` : '') + x.versioni.map(v => `<p>${v.v ? `<b>${v.v} (liv ${v.liv}):</b> ` : ''}${fmt(v.testo)}</p>`).join('') : paras(x.testo)}</div></details>`).join('');
+    }
+  }
+  return h + '</div>';
+}
+
+/* ================= ALBA ================= */
+function alba() {
+  let reag = M.reagentiGiorno(S), extra = 0;
+  if (S.liv >= 20) { extra = M.tira(2, 4) + 2; reag += extra; }
+  const scartati = S.inv.filter(x => x.fonte === 'base').reduce((a, x) => a + x.qta, 0);
+  S.inv = S.inv.filter(x => x.fonte !== 'base');
+  S.giorno = { reag, tot: reag, extra, base: true, preparati: [] };
+  S.cnt = {};
+  S.t = 0; S.eff = S.eff.filter(e => e.fine == null);
+  save();
+  toast(`Alba: ${reag} reagenti${extra ? ` (di cui ${extra} da Preparazione abbondante)` : ''}${scartati ? `, ${scartati} oggetti di ieri scartati` : ''}.`);
+}
+function vAlba() {
+  let h = `<div class="card stack"><h2>Alba</h2>
+    <p class="txt">All’alba, dopo 8 ore di riposo, ottieni i reagenti infusi e puoi usarli per l’alchimia di base. Gli oggetti di base del giorno prima e i reagenti avanzati vengono scartati.</p>
+    <div class="kv"><div><b>${M.reagentiGiorno(S)}${S.liv >= 20 ? '+2d4+2' : ''}</b><small>reagenti all’alba</small></div><div><b>${S.giorno ? S.giorno.reag : '—'}</b><small>reagenti ora</small></div></div>`;
+  if (UI.conferma === 'alba') h += `<div class="banner">Nuova alba: gli oggetti preparati con l’alchimia di base e i reagenti di oggi vengono scartati e i contatori ripartono. <div class="row" style="margin-top:6px"><button class="btn pri" type="button" data-a="albaOk">Conferma l’alba</button><button class="btn" type="button" data-a="annulla">Annulla</button></div></div>`;
+  else h += `<div class="row"><button class="btn pri" type="button" data-a="alba">Nuova alba (8 ore di riposo)</button></div>`;
+  h += '</div>';
+  if (!S.giorno) return h + `<div class="card"><p class="note">Premi «Nuova alba» per ottenere i reagenti del giorno.</p></div>`;
+  h += `<div class="card stack"><div class="hrow"><h2>Alchimia di base</h2><span class="etq">${S.giorno.reag} reagenti</span></div>`;
+  if (!S.giorno.base) {
+    h += `<p class="note">La preparazione di oggi è chiusa: i reagenti rimasti sono nella borsa per l’alchimia rapida.</p></div>`;
+  } else {
+    h += formPrep();
+    h += `<div class="row"><button class="btn" type="button" data-a="chiudiBase">Termina la preparazione</button><span class="note">I reagenti avanzati restano nella borsa.</span></div></div>`;
+  }
+  if (S.giorno.preparati.length) h += `<div class="card"><h2>Preparati oggi</h2><div class="list">${S.giorno.preparati.map(p => `<div class="ln"><span>${esc(p.nome)}</span><span>${p.reag} reag. → ${p.qta}</span></div>`).join('')}</div></div>`;
+  return h;
+}
+function formulePer(tipo, rapida) {
+  return M.formulario(S).filter(k => k[0] === tipo && !(rapida && M.soloBase(S, k)) && !M.tipiEsclusi(S).has(k[0]));
+}
+function formPrep() {
+  const P = UI.prep = UI.prep || { tipo: 'B', k: '', liv: 0, mods: [], pot: [], alt: false, coc: '', n: 1 };
+  const F = M.formulario(S);
+  const tipiOk = ['B', 'M', 'V'].filter(t => formulePer(t).length);
+  if (!tipiOk.includes(P.tipo)) P.tipo = tipiOk[0] || 'B';
+  let h = `<div class="seg">${[['B', 'Bomba'], ['M', 'Mutageno'], ['V', 'Veleno']].map(([k, n]) => `<button type="button" data-a="prepTipo" data-v="${k}" aria-pressed="${P.tipo === k}"${tipiOk.includes(k) ? '' : ' disabled'}>${n}</button>`).join('')}</div>`;
+  if (!tipiOk.length) return h + '<p class="note">Il formulario è vuoto.</p>';
+  let opzF = '';
+  if (P.tipo === 'B') {
+    const tipi = [...new Set(formulePer('B').map(k => k.split('|')[1]))];
+    if (!tipi.includes(P.k)) P.k = tipi[0];
+    const max = M.maxLivBomba(S, P.k);
+    if (!P.liv || P.liv > max || !F.includes(M.chiaveB(P.k, P.liv))) P.liv = max;
+    opzF = `<label class="field"><span class="label">Bomba</span><select id="p-k" data-f="prep.k">${tipi.map(t => `<option${t === P.k ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select></label>
+      <label class="field"><span class="label">Livello oggetto</span><select id="p-liv" data-f="prep.liv">${F.filter(k => k.startsWith('B|' + P.k + '|')).map(k => +k.split('|')[2]).sort((a, b) => a - b).map(l => `<option${l === P.liv ? ' selected' : ''}>${l}</option>`).join('')}</select></label>`;
+    const md = M.modificheDisponibili(S, P.k, false);
+    P.mods = P.mods.filter(n => md.some(m => m.nome === n));
+    const info = M.bombaInfo(S, P.k, P.liv, P.mods);
+    const W = M.verificaModifiche(S, P.k, P.mods);
+    h += `<div class="grid">${opzF}</div>`;
+    if (md.length) h += `<div class="field"><span class="label">Modifiche (massimo +5, solo con l’alchimia di base)</span><div class="chips">${md.map(m => `<button type="button" class="chip" data-a="prepMod" data-v="${esc(m.nome)}" aria-pressed="${P.mods.includes(m.nome)}">${esc(m.nome)} +${M.perfezionamento(S, P.k) === m.nome ? '0' : m.mod}</button>`).join('')}</div></div>`;
+    h += `<div class="banner">${esc(P.k)} ${P.liv}${info.modTot ? ` con modifica +${info.modTot} → livello ${info.livRid}` : ''}: <b>${info.n}d${info.d}${info.bonus ? ' + ' + info.bonus : ''}</b> ${esc(info.danno)}${info.spa ? `, spargimento ${info.spa}` : ''}${info.cd.map(c => ` · CD ${c.cd} (${esc(c.nome)})`).join('')}</div>`;
+    if (W.length) h += `<div class="banner warn">${W.map(esc).join('<br>')}</div>`;
+  } else if (P.tipo === 'M') {
+    const fs = formulePer('M');
+    if (!fs.includes(P.k)) P.k = fs[0];
+    const [, nome, v] = P.k.split('|');
+    const info = M.mutagenoInfo(S, nome, v);
+    h += `<label class="field"><span class="label">Mutageno</span><select id="p-k" data-f="prep.k">${fs.map(k => `<option value="${esc(k)}"${k === P.k ? ' selected' : ''}>${esc(M.nomeFormula(k))}</option>`).join('')}</select></label>`;
+    if (M.haDote(S, 'Cocktail mutagenico')) {
+      const altri = fs.filter(k => k !== P.k && k.split('|')[1] !== nome && Math.abs(M.livFormula(k) - info.liv) >= 4);
+      if (!altri.includes(P.coc)) P.coc = '';
+      h += `<label class="field"><span class="label">Cocktail mutagenico (2 reagenti → 1 esemplare): secondo mutageno di almeno 4 livelli di differenza</span><select id="p-coc" data-f="prep.coc"><option value="">Nessuno</option>${altri.map(k => `<option value="${esc(k)}"${k === P.coc ? ' selected' : ''}>${esc(M.nomeFormula(k))}</option>`).join('')}</select></label>`;
+    }
+    h += `<div class="banner">${esc(M.nomeFormula(P.k))}: ${info.istantaneo ? 'effetto istantaneo' : 'durata ' + esc(M.fmtDurata(info.totRound, info.unit))}${info.conc ? ` · concentrato (fino a ${info.maxFruitori} fruitori)` : ''}${info.freq ? ' · ' + esc(info.freq) : ''}</div>`;
+  } else {
+    const fs = formulePer('V');
+    if (!fs.includes(P.k)) P.k = fs[0];
+    const v = M.veleno(P.k.split('|')[1]);
+    const pd = M.potenziamentiDisponibili(S);
+    P.pot = P.pot.filter(n => pd.some(p => p.nome === n));
+    h += `<label class="field"><span class="label">Veleno</span><select id="p-k" data-f="prep.k">${fs.map(k => `<option value="${esc(k)}"${k === P.k ? ' selected' : ''}>${esc(k.split('|')[1])} (pot ${M.veleno(k.split('|')[1]).pot})</option>`).join('')}</select></label>`;
+    if (pd.length) h += `<div class="field"><span class="label">Potenziamenti (potenza massima del formulario: ${M.maxPotenza(S)})</span><div class="chips">${pd.map(p => `<button type="button" class="chip" data-a="prepPot" data-v="${esc(p.nome)}" aria-pressed="${P.pot.includes(p.nome)}">${esc(p.nome)} +${p.pot}</button>`).join('')}</div></div>`;
+    if (M.haDote(S, 'Alterazione molecolare')) h += `<button type="button" class="chip" data-a="prepAlt" aria-pressed="${P.alt}">Alterazione molecolare (${esc(M.tsVeleno(v, true))}, CD −2)</button>`;
+    const W = M.verificaPotenziamenti(S, v.nome, P.pot);
+    h += `<div class="banner">${esc(v.nome)}: CD ${M.cdVeleno(S, v, P.alt)} ${esc(M.tsVeleno(v, P.alt))} · potenza ${v.pot}</div>`;
+    if (W.length) h += `<div class="banner warn">${W.map(esc).join('<br>')}</div>`;
+  }
+  const opz = { cocktail: !!P.coc, pot: P.pot };
+  const ese = M.esemplari(S, P.tipo === 'B' ? M.chiaveB(P.k, P.liv) : P.k, opz);
+  const costo = P.coc ? 2 : 1;
+  const maxN = Math.max(1, Math.floor(S.giorno.reag / costo));
+  P.n = Math.min(Math.max(1, P.n), maxN);
+  h += `<div class="ctr"><div><b style="text-align:left">${P.n * costo}</b> <span class="note">${P.n * costo === 1 ? 'reagente' : 'reagenti'} → ${P.n * ese} ${P.n * ese === 1 ? 'esemplare' : 'esemplari'} (${ese} per ${costo === 2 ? '2 reagenti' : 'reagente'})</span></div>
+    <div class="pips"><button class="btn sm" type="button" data-a="prepN" data-v="-1" aria-label="Meno">−</button><button class="btn sm" type="button" data-a="prepN" data-v="1" aria-label="Più">+</button></div></div>
+    <div class="row"><button class="btn pri" type="button" data-a="prepara"${S.giorno.reag < costo ? ' disabled' : ''}>Prepara</button></div>`;
+  return h;
+}
+function aggiungiInv(it) {
+  const same = S.inv.find(x => x.fonte === it.fonte && x.fonte === 'base' && JSON.stringify([x.k, x.opz]) === JSON.stringify([it.k, it.opz]));
+  if (same) same.qta += it.qta; else S.inv.push(Object.assign({ id: 'i' + Date.now().toString(36) + Math.floor(Math.random() * 1e5) }, it));
+}
+function nomeItem(it) {
+  const p = it.k.split('|');
+  if (it.kind === 'B') return `Bomba ${p[1].toLowerCase()} ${it.opz.liv}${it.opz.mods && it.opz.mods.length ? ' (' + it.opz.mods.join(', ') + ')' : ''}`;
+  if (it.kind === 'C') return 'Cocktail: ' + M.nomeFormula(it.k) + ' + ' + M.nomeFormula(it.opz.coc);
+  if (it.kind === 'M') return M.nomeFormula(it.k);
+  if (it.opz.misto) return 'Miscela: ' + it.opz.misto.join(' + ');
+  return p[1] + (it.opz.pot && it.opz.pot.length ? ' (' + it.opz.pot.join(', ') + ')' : '') + (it.opz.alt ? ' [alterato]' : '');
+}
+function prepara() {
+  const P = UI.prep;
+  const costo = P.coc ? 2 : 1;
+  if (S.giorno.reag < P.n * costo) return toast('Reagenti insufficienti.');
+  if (P.tipo === 'B') { const W = M.verificaModifiche(S, P.k, P.mods); if (W.length) return toast(W[0]); }
+  if (P.tipo === 'V') { const W = M.verificaPotenziamenti(S, P.k.split('|')[1], P.pot); if (W.length) return toast(W[0]); }
+  if (P.tipo === 'V' && P.alt) { const c = M.contatori(S).find(x => x.k === 'alterazione'); if ((S.cnt.alterazione || 0) >= c.max) return toast('Alterazione molecolare esaurita per oggi.'); S.cnt.alterazione = (S.cnt.alterazione || 0) + 1; }
+  const ese = M.esemplari(S, P.tipo === 'B' ? M.chiaveB(P.k, P.liv) : P.k, { cocktail: !!P.coc, pot: P.pot });
+  let it;
+  if (P.tipo === 'B') it = { kind: 'B', k: M.chiaveB(P.k, P.liv), opz: { liv: P.liv, mods: P.mods.slice() } };
+  else if (P.tipo === 'M') it = { kind: P.coc ? 'C' : 'M', k: P.k, opz: P.coc ? { coc: P.coc } : {} };
+  else it = { kind: 'V', k: P.k, opz: { pot: P.pot.slice(), alt: !!P.alt } };
+  it.qta = P.n * ese; it.fonte = 'base'; it.scade = null;
+  aggiungiInv(it);
+  S.giorno.reag -= P.n * costo;
+  S.giorno.preparati.push({ nome: nomeItem(it), reag: P.n * costo, qta: it.qta });
+  save(); toast(`Preparati ${it.qta} × ${nomeItem(it)}.`);
+}
+
+/* ================= BORSA ================= */
+function avanza(r) {
+  S.t += r;
+  const scad = S.inv.filter(x => x.scade != null && x.scade <= S.t);
+  S.inv = S.inv.filter(x => !(x.scade != null && x.scade <= S.t));
+  const fin = S.eff.filter(e => e.fine != null && e.fine <= S.t);
+  S.eff = S.eff.filter(e => !(e.fine != null && e.fine <= S.t));
+  save();
+  const msg = [];
+  if (scad.length) msg.push(scad.length + ' oggetti dell’alchimia rapida scaduti');
+  if (fin.length) msg.push('terminati: ' + fin.map(e => e.nome).join(', '));
+  if (msg.length) toast(msg.join('; ') + '.');
+}
+function vBorsa() {
+  const cnt = M.contatori(S);
+  const reag = S.giorno ? S.giorno.reag : 0;
+  let h = `<div class="card stack"><div class="tempo"><div><div class="label">Tempo dall’alba</div><div class="big" style="font-size:1.3rem">${esc(tempoTxt(S.t).replace('tempo ', ''))}</div></div>
+    <div class="row">${[[1, '+1 round'], [10, '+1 min'], [100, '+10 min'], [600, '+1 h']].map(([r, n]) => `<button class="btn sm" type="button" data-a="avanza" data-v="${r}">${n}</button>`).join('')}</div></div></div>`;
+  // risorse
+  h += `<div class="card stack"><h2>Risorse del giorno</h2>
+    <div class="ctr"><div><span class="big">${reag}</span> <span class="note">reagenti infusi${S.giorno ? ' su ' + S.giorno.tot : ''}</span></div>
+      <div class="pips"><button class="btn sm" type="button" data-a="reag" data-v="-1" aria-label="Togli un reagente">−</button><button class="btn sm" type="button" data-a="reag" data-v="1" aria-label="Aggiungi un reagente">+</button></div></div>`;
+  for (const c of cnt) {
+    const u = S.cnt[c.k] || 0;
+    const rest = c.max === Infinity ? '∞' : Math.max(0, c.max - u);
+    h += `<div class="ctr"><div><div>${esc(c.nome)}</div>${c.nota ? `<div class="note">${esc(c.nota)}</div>` : ''}</div><div class="pips"><button class="btn sm" type="button" data-a="cnt" data-k="${c.k}" data-v="1" aria-label="Usa">−</button><b>${rest}${c.max === Infinity ? '' : ' / ' + c.max}</b><button class="btn sm" type="button" data-a="cnt" data-k="${c.k}" data-v="-1" aria-label="Recupera">+</button></div></div>`;
+  }
+  if (!S.giorno) h += `<p class="note">Fai la prima alba nella scheda «Alba».</p>`;
+  h += '</div>';
+  if (S.ultimo) h += `<div class="esito" aria-live="polite">${S.ultimo}<div class="row" style="margin-top:6px"><button class="btn sm" type="button" data-a="chiudiEsito">Chiudi</button></div></div>`;
+  // alchimia rapida
+  h += cardRapida(reag);
+  // effetti
+  if (S.eff.length) h += `<div class="card stack"><h2>Effetti attivi</h2>${S.eff.map(e => `<div class="ctr"><div><div>${esc(e.nome)}</div><div class="note">${e.fine == null ? esc(e.nota || '') : 'restano ' + esc(M.fmtDurata(e.fine - S.t, e.unit || 'round'))}${e.nota && e.fine != null ? ' · ' + esc(e.nota) : ''}</div></div><button class="btn sm" type="button" data-a="finisci" data-id="${e.id}">Termina</button></div>`).join('')}</div>`;
+  // inventario
+  h += `<div class="card stack"><h2>Borsa dell’alchimista</h2>`;
+  const dil = M.diluiteTipi(S).filter(t => M.maxLivBomba(S, t));
+  if (!S.inv.length && !dil.length) h += `<p class="note">La borsa è vuota. Prepara gli oggetti all’alba o crea con l’alchimia rapida.</p>`;
+  for (const t of dil) h += itemBomba({ id: 'dil-' + t, kind: 'B', k: M.chiaveB(t, M.maxLivBomba(S, t)), opz: { liv: M.maxLivBomba(S, t), mods: [], diluita: true }, qta: Infinity, fonte: 'diluita' });
+  for (const it of S.inv) h += it.kind === 'B' ? itemBomba(it) : it.kind === 'V' ? itemVeleno(it) : itemMutageno(it);
+  h += '</div>';
+  if (M.haDote(S, 'Liquido decatalizzante') && S.liv >= 14) h += cardDecat();
+  return h;
+}
+function cardRapida(reag) {
+  const R = UI.rapida = UI.rapida || { k: '' };
+  const fs = [...formulePer('B', true), ...formulePer('M', true), ...formulePer('V', true)];
+  if (!fs.length) return '';
+  if (!fs.includes(R.k)) R.k = fs[0];
+  const az = S.liv >= 19 ? 'azione gratuita (1 per turno)' : S.liv >= 7 ? 'azione di movimento senza attacchi di opportunità' : 'azione di movimento che provoca attacchi di opportunità';
+  return `<div class="card stack"><h2>Alchimia rapida</h2><p class="note">1 reagente → 1 esemplare, scade dopo 1 minuto (10 round). ${esc(az[0].toUpperCase() + az.slice(1))}. Niente modifiche né potenziamenti.</p>
+    <label class="field"><span class="label">Formula</span><select id="r-k" data-f="rapida.k">${fs.map(k => `<option value="${esc(k)}"${k === R.k ? ' selected' : ''}>${esc(M.nomeFormula(k))}</option>`).join('')}</select></label>
+    <div class="row"><button class="btn pri" type="button" data-a="rapida"${reag < 1 ? ' disabled' : ''}>Crea (1 reagente)</button></div></div>`;
+}
+function righe(arr) { return arr.map(([a, b]) => `<div class="ln"><span>${a}</span><span>${b}</span></div>`).join(''); }
+function scadeTxt(it) {
+  if (it.fonte === 'diluita') return 'diluita · illimitata';
+  if (it.fonte === 'rapida') return 'rapida · scade fra ' + M.fmtDurata(Math.max(0, it.scade - S.t), 'round');
+  return 'alchimia di base · fino all’alba';
+}
+function itemBomba(it) {
+  const p = it.k.split('|'), tipo = p[1];
+  const gas = !!UI.gas[it.id];
+  const info = M.bombaInfo(S, tipo, it.opz.liv, it.opz.mods, { diluita: it.opz.diluita });
+  const bs = M.bersagliBomba(tipo);
+  const bsel = UI.bersaglio[it.id] || '';
+  const b = M.bomba(tipo);
+  return `<div class="it B"><div class="top"><div><span class="tag B">${it.opz.diluita ? 'diluita' : 'bomba'}</span> <span class="nm">${esc(it.opz.diluita ? 'Bomba ' + tipo.toLowerCase() + ' diluita' : nomeItem(it))}</span><div class="note">${esc(scadeTxt(it))}</div></div><span class="qta">${it.qta === Infinity ? '∞' : '×' + it.qta}</span></div>
+    ${righe([['Danni', `${info.n}d${info.d}${info.bonus ? ' + ' + info.bonus : ''} ${esc(info.danno)}`], ['Spargimento', info.spa ? info.spa : 'nessuno'], ['Livello', info.livRid + (info.livRid !== info.livFormula ? ` (formula ${info.livFormula})` : '')]].concat(info.cd.map(c => [esc(c.nome), 'CD ' + c.cd])))}
+    ${info.note.length ? `<div class="note">${info.note.map(fmt).join('<br>')}</div>` : ''}
+    <details><summary><span class="note">Effetto</span></summary><div class="txt">${paras(b.testo)}${(it.opz.mods || []).map(n => { const d = M.dote(n); return d ? `<p><b>${esc(n)}:</b> ${fmt(d.testo.join(' '))}</p>` : ''; }).join('')}</div></details>
+    <div class="row">${bs.length > 1 ? `<select id="bs-${it.id}" data-f="bersaglio" data-id="${it.id}" aria-label="Bersaglio">${bs.map(([k, n]) => `<option value="${k}"${k === bsel ? ' selected' : ''}>contro ${esc(n)}</option>`).join('')}</select>` : ''}
+      ${M.arch(S).gassose && !it.opz.diluita ? `<button type="button" class="chip" data-a="gas" data-id="${it.id}" aria-pressed="${gas}">Gassosa</button>` : ''}
+      <button class="btn pri sm" type="button" data-a="lancia" data-id="${it.id}">Lancia</button>${it.fonte !== 'diluita' ? `<button class="btn sm" type="button" data-a="scarta" data-id="${it.id}">Scarta</button>` : ''}</div></div>`;
+}
+function itemMutageno(it) {
+  const [, nome, v] = it.k.split('|');
+  const info = M.mutagenoInfo(S, nome, v);
+  const I = UI.inocula[it.id] = UI.inocula[it.id] || { n: 1, alleati: 0 };
+  I.n = Math.min(Math.max(1, I.n), info.maxFruitori);
+  const self = info.soloSe;
+  I.alleati = self ? 0 : Math.min(Math.max(0, I.alleati), I.n);
+  const div = info.istantaneo ? '' : M.fmtDurata(M.dividi(info.totRound, I.n), info.unit);
+  let extra = '';
+  if (it.kind === 'C') { const [, n2, v2] = it.opz.coc.split('|'); const i2 = M.mutagenoInfo(S, n2, v2); extra = `<div class="note">Secondo mutageno: ${esc(M.nomeFormula(it.opz.coc))} (${i2.istantaneo ? 'istantaneo' : esc(M.fmtDurata(i2.totRound, i2.unit))}). Un solo fruitore.</div>`; }
+  return `<div class="it M"><div class="top"><div><span class="tag M">${it.kind === 'C' ? 'cocktail' : 'mutageno'}</span> <span class="nm">${esc(nomeItem(it))}</span><div class="note">${esc(scadeTxt(it))}</div></div><span class="qta">×${it.qta}</span></div>
+    ${righe([['Durata', info.istantaneo ? 'istantaneo' : esc(M.fmtDurata(info.totRound, info.unit))]].concat(info.conc && it.kind !== 'C' ? [['A testa', esc(div) + ` (${I.n} fruitori)`]] : []).concat(info.freq ? [['Limite', esc(info.freq)]] : []))}
+    ${extra}${info.soloAnimali ? '<div class="note">Solo sugli animali.</div>' : ''}
+    <details><summary><span class="note">Effetto</span></summary><div class="txt"><p>${fmt(info.testo)}</p></div></details>
+    <div class="row">${info.conc && it.kind !== 'C' ? `<span class="note">Fruitori</span><button class="btn sm" type="button" data-a="inoc" data-id="${it.id}" data-k="n" data-v="-1">−</button><b class="etq">${I.n}</b><button class="btn sm" type="button" data-a="inoc" data-id="${it.id}" data-k="n" data-v="1">+</button>` : ''}
+      ${self ? '<span class="note">Solo su di te</span>' : `<span class="note">di cui alleati</span><button class="btn sm" type="button" data-a="inoc" data-id="${it.id}" data-k="alleati" data-v="-1">−</button><b class="etq">${I.alleati}</b><button class="btn sm" type="button" data-a="inoc" data-id="${it.id}" data-k="alleati" data-v="1">+</button>`}</div>
+    <div class="row"><button class="btn pri sm" type="button" data-a="inocula" data-id="${it.id}">Inocula</button><button class="btn sm" type="button" data-a="scarta" data-id="${it.id}">Scarta</button></div></div>`;
+}
+function itemVeleno(it) {
+  const v = M.veleno(it.k.split('|')[1]);
+  const cd = M.cdVeleno(S, v, it.opz.alt);
+  const altri = S.inv.filter(x => x.kind === 'V' && x.id !== it.id && x.k !== it.k && !(x.opz.pot || []).length);
+  const pots = (it.opz.pot || []).map(n => M.dote(n)).filter(Boolean);
+  return `<div class="it V"><div class="top"><div><span class="tag V">veleno</span> <span class="nm">${esc(nomeItem(it))}</span><div class="note">${esc(scadeTxt(it))}</div></div><span class="qta">×${it.qta}</span></div>
+    ${righe([['Tiro Salvezza', esc(M.tsVeleno(v, it.opz.alt)) + ' CD ' + cd], ['Potenza', v.pot + pots.reduce((a, d) => a + d.pot, 0)], ['Sull’arma', M.permanenzaVeleno(S) + ' ore']])}
+    <details><summary><span class="note">Effetto</span></summary><div class="txt">${(it.opz.misto || [v.nome]).map(n => { const x = M.veleno(n); return `<p>${it.opz.misto ? '<b>' + esc(n) + ':</b> ' : ''}${fmt(x.effetto)}</p>`; }).join('')}${pots.map(d => `<p><b>${esc(d.nome)}:</b> ${fmt(d.testo.join(' '))}</p>`).join('')}</div></details>
+    <div class="row"><button class="btn pri sm" type="button" data-a="applica" data-id="${it.id}">Applica all’arma</button>
+    ${M.haDote(S, 'Miscelazione tossica') && altri.length ? `<select id="mx-${it.id}" data-f="misc" data-id="${it.id}" aria-label="Miscela con"><option value="">Miscela con…</option>${altri.map(x => `<option value="${x.id}">${esc(nomeItem(x))}</option>`).join('')}</select>` : ''}
+    <button class="btn sm" type="button" data-a="scarta" data-id="${it.id}">Scarta</button></div></div>`;
+}
+function cardDecat() {
+  const base = S.inv.filter(x => x.fonte === 'base');
+  const usato = (S.cnt.decatalizzante || 0) >= 1;
+  return `<div class="card stack"><h2>Liquido decatalizzante</h2><p class="note">Una volta al giorno, azione di round completo: sacrifichi 2 oggetti preparati con l’alchimia di base e ottieni 1 reagente infuso.</p>
+    <div class="row"><select id="dc-1" aria-label="Primo oggetto">${base.map(x => `<option value="${x.id}">${esc(nomeItem(x))} ×${x.qta}</option>`).join('')}</select>
+    <select id="dc-2" aria-label="Secondo oggetto">${base.map(x => `<option value="${x.id}">${esc(nomeItem(x))} ×${x.qta}</option>`).join('')}</select>
+    <button class="btn sm" type="button" data-a="decat"${usato || !base.length ? ' disabled' : ''}>Sacrifica</button></div></div>`;
+}
+function usa(it, n) { it.qta -= n || 1; if (it.qta <= 0 && it.qta !== Infinity) S.inv = S.inv.filter(x => x.id !== it.id); }
+function trova(id) {
+  if (id.startsWith('dil-')) { const t = id.slice(4); const l = M.maxLivBomba(S, t); return { id, kind: 'B', k: M.chiaveB(t, l), opz: { liv: l, mods: [], diluita: true }, qta: Infinity, fonte: 'diluita' }; }
+  return S.inv.find(x => x.id === id);
+}
+function lancia(id) {
+  const it = trova(id); if (!it) return;
+  const tipo = it.k.split('|')[1];
+  const info = M.bombaInfo(S, tipo, it.opz.liv, it.opz.mods, { diluita: it.opz.diluita });
+  const bers = UI.bersaglio[id] || '';
+  const r = M.tiraBomba(S, info, bers);
+  const gas = M.arch(S).gassose && UI.gas[id];
+  S.ultimo = `<div class="label">${esc(it.opz.diluita ? 'Bomba ' + tipo.toLowerCase() + ' diluita' : nomeItem(it))}${bers ? ' · contro ' + esc((M.bersagliBomba(tipo).find(x => x[0] === bers) || [])[1]) : ''}</div>
+    <div class="tot">${r.totale} <span class="note">${esc(info.danno)}</span></div>
+    <div class="dadi">${r.dadi.length}d${r.d}: ${r.dadi.join(' + ')}${tipo === 'Rovospina' ? ' (metà)' : ''}${info.bonus ? ' + ' + info.bonus : ''}${r.rip ? ` · ripetuti i risultati ≤ ${r.rip}` : ''}</div>
+    <div class="txt">Spargimento: <b>${r.spa || 'nessuno'}</b>${info.cd.map(c => ` · ${esc(c.nome)} CD <b>${c.cd}</b>`).join('')}${gas ? '<br>Gassosa: nube di 4,5 m per 2 round (danni primari a chi vi termina il turno).' : ''}</div>`;
+  if (it.qta !== Infinity) usa(it, 1);
+  save();
+}
+function inocula(id) {
+  const it = trova(id); if (!it) return;
+  const [, nome, v] = it.k.split('|');
+  const info = M.mutagenoInfo(S, nome, v);
+  const I = UI.inocula[id] || { n: 1, alleati: 0 };
+  const n = it.kind === 'C' ? 1 : I.n, al = info.soloSe ? 0 : Math.min(I.alleati, n);
+  const inibMax = M.inibitoriMax(S);
+  if (al > 0 && inibMax !== Infinity) {
+    const u = S.cnt.inibitori || 0;
+    if (u + al > inibMax) return toast(`Agenti inibitori insufficienti: ne restano ${Math.max(0, inibMax - u)}.`);
+    S.cnt.inibitori = u + al;
+  }
+  const parti = [];
+  const add = (nm, inf) => {
+    if (inf.istantaneo) return;
+    const ognuno = M.dividi(inf.totRound, n);
+    if (!al && n === 1) S.eff = S.eff.filter(e => e.nome !== nm);
+    S.eff.push({ id: 'e' + Date.now().toString(36) + Math.floor(Math.random() * 1e5), nome: nm + (n > 1 ? ` (${n} fruitori)` : ''), fine: S.t + ognuno, unit: inf.unit });
+    parti.push(`${esc(nm)}: ${esc(M.fmtDurata(ognuno, inf.unit))}${n > 1 ? ' a testa' : ''}`);
+  };
+  add(M.nomeFormula(it.k), info);
+  let cura = '';
+  if (info.cura) { const c = M.tiraCura(S, info.cura); cura = `<div class="tot">${c.totale} <span class="note">PF curati</span></div><div class="dadi">${c.dadi.length ? info.cura.n + 'd' + info.cura.d + ': ' + c.dadi.join(' + ') + ' + ' : ''}${info.cura.fisso}${c.rip ? ` · ripetuti i risultati ≤ ${c.rip}` : ''}</div>`; }
+  if (it.kind === 'C') { const [, n2, v2] = it.opz.coc.split('|'); add(M.nomeFormula(it.opz.coc), M.mutagenoInfo(S, n2, v2)); }
+  S.ultimo = `<div class="label">${esc(nomeItem(it))} inoculato${al ? ` (${al} su alleati${inibMax !== Infinity ? `: −${al} agenti inibitori` : ''})` : ''}</div>${cura}<div class="txt">${parti.join('<br>') || 'Effetto istantaneo.'}${info.freq ? `<br>Ricorda: ${esc(info.freq)} per ogni fruitore.` : ''}</div>`;
+  usa(it, 1); save();
+}
+function applica(id) {
+  const it = trova(id); if (!it) return;
+  const v = M.veleno(it.k.split('|')[1]);
+  S.eff.push({ id: 'e' + Date.now().toString(36), nome: 'Arma avvelenata: ' + nomeItem(it), fine: S.t + M.permanenzaVeleno(S) * 600, unit: 'ore', nota: `CD ${M.cdVeleno(S, v, it.opz.alt)} ${M.tsVeleno(v, it.opz.alt)}, fino al primo colpo` });
+  S.ultimo = `<div class="label">${esc(nomeItem(it))} applicato</div><div class="txt">Resta sull’arma ${M.permanenzaVeleno(S)} ore o fino al primo colpo a segno. CD ${M.cdVeleno(S, v, it.opz.alt)} (${esc(M.tsVeleno(v, it.opz.alt))}).</div>`;
+  usa(it, 1); save();
+}
+
+/* ================= MANUALE ================= */
+function vManuale() {
+  const f = UI.man, q = UI.cercaMan.toLowerCase();
+  const voci = [];
+  const add = (cat, nome, html, testo) => voci.push({ cat, nome, html, testo: (nome + ' ' + testo).toLowerCase() });
+  for (const p of D.privilegi) add('privilegi', p.nome, paras(p.testo), p.testo.join(' '));
+  for (const [k, sez] of Object.entries(D.regole)) for (const r of (Array.isArray(sez) ? sez : [])) if (r.nome) add('regole', `${r.nome} (${k})`, paras(r.testo), r.testo.join(' '));
+  for (const b of D.bombe) add('bombe', 'Bomba ' + b.nome.toLowerCase() + (b.esclusiva ? ' (' + b.esclusiva + ')' : ''), `<p class="note">${esc(b.ingr)}</p>${paras(b.testo)}`, b.testo.join(' '));
+  for (const m of D.mutageni) add('mutageni', m.nome + (m.esclusivo ? ' (' + m.esclusivo + ')' : ''), `<p class="note">Livello ${m.livelli.join(', ')}${m.tag.length ? ' · ' + esc(m.tag.join(', ')) : ''}</p>${m.comune ? `<p>${fmt(m.comune)}</p>` : ''}${m.versioni.map(v => `<p>${v.v ? `<b>${v.v}:</b> ` : ''}${fmt(v.testo)}</p>`).join('')}`, m.versioni.map(v => v.testo).join(' '));
+  for (const v of D.veleni) add('veleni', v.nome, `<p class="note">Liv. ${v.liv} · potenza ${v.pot} · tossicità ${segno(v.tox)} · ${esc(v.ts)}</p><p><i>${fmt(v.flavor)}</i></p><p>${fmt(v.effetto)}</p>`, v.effetto);
+  for (const d of D.doti) add('doti', d.nome + (d.esclusiva ? ' (' + d.esclusiva + ')' : ''), `<p>${catTag(d.cat)} ${d.mod != null ? `<span class="tag">modifica +${d.mod}</span>` : ''}${d.pot != null ? `<span class="tag">potenziamento +${d.pot}</span>` : ''}</p>${d.req ? `<p><b>Requisiti:</b> ${fmt(d.req.testo)}</p>` : ''}${paras(d.testo)}${d.speciale.map(s => `<p><b>Speciale:</b> ${fmt(s)}</p>`).join('')}`, d.testo.filter(x => typeof x === 'string').join(' '));
+  for (const a of D.archetipi) add('archetipi', a.nome, `<p class="note">${fmt(a.flavor)}</p>${a.voci.map(v => `<h3>${esc(v.nome)}</h3>${paras(v.testo)}${v.dicitura ? `<p class="note"><i>${esc(v.dicitura)}</i></p>` : ''}`).join('')}`, a.voci.map(v => v.testo.filter(x => typeof x === 'string').join(' ')).join(' '));
+  let lista = voci.filter(v => (f === 'tutto' || v.cat === f) && (!q || v.testo.includes(q)));
+  const tot = lista.length;
+  if (!q && f === 'tutto') lista = lista.slice(0, 40);
+  const cats = [['tutto', 'Tutto'], ['privilegi', 'Privilegi'], ['regole', 'Regole'], ['bombe', 'Bombe'], ['mutageni', 'Mutageni'], ['veleni', 'Veleni'], ['doti', 'Doti'], ['archetipi', 'Archetipi']];
+  return `<div class="card stack"><h2>Manuale dell’alchimista</h2><p class="note">Testi da ${esc(D.fonte)}.</p>
+    <input class="search" id="q-man" data-f="cercaMan" placeholder="Cerca nel manuale" value="${esc(UI.cercaMan)}">
+    <div class="chips">${cats.map(([k, n]) => `<button class="chip" type="button" data-a="man" data-v="${k}" aria-pressed="${f === k}">${n}</button>`).join('')}</div>
+    <div class="note">${tot} voci${lista.length < tot ? ', le prime ' + lista.length + ': scegli una categoria o cerca' : ''}</div>
+    <div>${lista.map(v => `<details><summary><span>${esc(v.nome)}</span></summary><div class="txt">${v.html}</div></details>`).join('')}</div></div>`;
+}
+
+/* ================= render ed eventi ================= */
+let inRender = false, pendente = false;
+function render() {
+  if (inRender) { pendente = true; return; }
+  inRender = true;
+  try { renderOra(); } finally { inRender = false; }
+  if (pendente) { pendente = false; render(); }
+}
+function renderOra() {
+  header();
+  const m = document.getElementById('main');
+  const views = { scheda: vScheda, alba: vAlba, borsa: vBorsa, manuale: vManuale };
+  m.innerHTML = `<section class="panel">${(views[G.tab] || vScheda)()}</section>`;
+  document.getElementById('ov').innerHTML = UI.ov === 'doti' ? `<div class="overlay" data-a="chiudiFuori">${overlayDoti()}</div>` : '';
+}
+function rifocus(id, fn) { fn(); const el = document.getElementById(id); if (el) { el.focus(); const v = el.value; try { el.setSelectionRange(v.length, v.length); } catch (e) {} } }
+document.addEventListener('click', ev => {
+  const tab = ev.target.closest('[data-tab]');
+  if (tab) { G.tab = tab.dataset.tab; save(); render(); window.scrollTo(0, 0); return; }
+  const b = ev.target.closest('[data-a]');
+  if (!b || !b.dataset.a) return;
+  const a = b.dataset.a, v = b.dataset.v, k = b.dataset.k, id = b.dataset.id;
+  if (a === 'chiudiFuori' && ev.target !== b) return;
+  switch (a) {
+    case 'pgNuovo': { const s = nuovoPg(); G.pg[s.id] = s; G.attivo = s.id; S = s; G.tab = 'scheda'; UI.prep = UI.rapida = null; break; }
+    case 'campo': S.campo = v; break;
+    case 'opz': S.opz[k] = v; break;
+    case 'apriDoti': UI.ov = 'doti'; break;
+    case 'chiudi': case 'chiudiFuori': UI.ov = null; break;
+    case 'filtroDoti': UI.filtroDoti = v; break;
+    case 'soloDisp': UI.soloDisp = !UI.soloDisp; break;
+    case 'aggDote': S.doti.push(v); toast('Aggiunta: ' + v); break;
+    case 'togliDote': S.doti.splice(+b.dataset.i, 1); break;
+    case 'formula': { const i = S.formule.indexOf(k); if (i >= 0) S.formule.splice(i, 1); else S.formule.push(k); break; }
+    case 'diluita': { const l = S.opz.diluite = S.opz.diluite || []; const i = l.indexOf(v); if (i >= 0) l.splice(i, 1); else { l.push(v); while (l.length > M.diluiteMax(S)) l.shift(); } break; }
+    case 'economico': { const l = S.opz.economici = S.opz.economici || []; const i = l.indexOf(k); if (i >= 0) l.splice(i, 1); else { l.push(k); while (l.length > 2) l.shift(); } break; }
+    case 'espanso': { const l = S.opz.espanso = S.opz.espanso || []; l[+b.dataset.i] = +v; break; }
+    case 'alba': UI.conferma = 'alba'; break;
+    case 'annulla': UI.conferma = null; break;
+    case 'albaOk': UI.conferma = null; alba(); break;
+    case 'chiudiBase': S.giorno.base = false; break;
+    case 'prepTipo': UI.prep.tipo = v; UI.prep.k = ''; UI.prep.mods = []; UI.prep.pot = []; UI.prep.coc = ''; UI.prep.alt = false; break;
+    case 'prepMod': { const l = UI.prep.mods; const i = l.indexOf(v); if (i >= 0) l.splice(i, 1); else l.push(v); break; }
+    case 'prepPot': { const l = UI.prep.pot; const i = l.indexOf(v); if (i >= 0) l.splice(i, 1); else l.push(v); break; }
+    case 'prepAlt': UI.prep.alt = !UI.prep.alt; break;
+    case 'prepN': UI.prep.n += +v; break;
+    case 'prepara': prepara(); break;
+    case 'avanza': avanza(+v); break;
+    case 'reag': if (S.giorno) S.giorno.reag = Math.max(0, S.giorno.reag + +v); break;
+    case 'cnt': S.cnt[k] = Math.max(0, (S.cnt[k] || 0) + +v); break;
+    case 'rapida': {
+      if (!S.giorno || S.giorno.reag < 1) { toast('Nessun reagente nella borsa.'); break; }
+      const rk = UI.rapida.k; const p = rk.split('|');
+      const it = p[0] === 'B' ? { kind: 'B', k: rk, opz: { liv: +p[2], mods: [] } } : p[0] === 'M' ? { kind: 'M', k: rk, opz: {} } : { kind: 'V', k: rk, opz: { pot: [], alt: false } };
+      it.qta = 1; it.fonte = 'rapida'; it.scade = S.t + 10; aggiungiInv(it); S.giorno.reag -= 1; toast('Creato: ' + nomeItem(it)); break;
+    }
+    case 'chiudiEsito': S.ultimo = null; break;
+    case 'finisci': S.eff = S.eff.filter(e => e.id !== id); break;
+    case 'lancia': lancia(id); break;
+    case 'gas': UI.gas[id] = !UI.gas[id]; break;
+    case 'inoc': { const I = UI.inocula[id] = UI.inocula[id] || { n: 1, alleati: 0 }; I[k] = (I[k] || 0) + +v; break; }
+    case 'inocula': inocula(id); break;
+    case 'applica': applica(id); break;
+    case 'scarta': S.inv = S.inv.filter(x => x.id !== id); break;
+    case 'decat': {
+      const i1 = document.getElementById('dc-1').value, i2 = document.getElementById('dc-2').value;
+      const a1 = trova(i1), a2 = trova(i2);
+      if (!a1 || !a2 || (i1 === i2 && a1.qta < 2)) { toast('Scegli due oggetti.'); break; }
+      usa(a1, 1); if (i1 === i2) usa(a1, 1); else usa(a2, 1);
+      S.giorno.reag += 1; S.cnt.decatalizzante = 1; toast('+1 reagente infuso.'); break;
+    }
+    case 'man': UI.man = v; break;
+    default: return;
+  }
+  save(); render();
+});
+document.addEventListener('input', ev => {
+  const f = ev.target.dataset && ev.target.dataset.f; if (!f) return;
+  const val = ev.target.value;
+  if (f === 'nome') { S.nome = val; save(); header(); return; }
+  if (f === 'cercaDoti' || f === 'cercaMut' || f === 'cercaMan') { UI[f] = val; rifocus(ev.target.id, render); return; }
+});
+document.addEventListener('change', ev => {
+  const el = ev.target;
+  if (el.id === 'pgSel') { G.attivo = el.value; S = G.pg[G.attivo]; UI.prep = UI.rapida = null; save(); render(); return; }
+  const f = el.dataset && el.dataset.f; if (!f) return;
+  const val = el.value;
+  if (f === 'liv') S.liv = +val;
+  else if (f === 'int') S.int = Math.max(-5, Math.min(15, parseInt(val, 10) || 0));
+  else if (f === 'arch') { S.arch = val; const ad = M.archDati(S); if (ad && ad.campo) S.campo = ad.campo; }
+  else if (f === 'nuovoConc' || f === 'vperfetto') S.opz[f] = val;
+  else if (f === 'prep.k') { UI.prep.k = UI.prep.tipo === 'B' ? val : val; UI.prep.liv = 0; UI.prep.mods = []; UI.prep.coc = ''; }
+  else if (f === 'prep.liv') UI.prep.liv = +val;
+  else if (f === 'prep.coc') UI.prep.coc = val;
+  else if (f === 'rapida.k') UI.rapida.k = val;
+  else if (f === 'bersaglio') UI.bersaglio[el.dataset.id] = val;
+  else if (f === 'misc') {
+    const a1 = trova(el.dataset.id), a2 = trova(val);
+    if (a1 && a2) {
+      const v1 = M.veleno(a1.k.split('|')[1]), v2 = M.veleno(a2.k.split('|')[1]);
+      const forte = v1.tox >= v2.tox ? a1 : a2;
+      usa(a1, 1); usa(a2, 1);
+      aggiungiInv({ kind: 'V', k: forte.k, opz: { pot: [], alt: false, misto: [v1.nome, v2.nome] }, qta: 1, fonte: 'base', scade: null });
+      toast(`Miscela: 1 dose con tossicità ${segno(Math.max(v1.tox, v2.tox))}.`);
+    }
+  }
+  else if (f === 'nome') return;
+  save(); render();
+});
+render();
+</script>

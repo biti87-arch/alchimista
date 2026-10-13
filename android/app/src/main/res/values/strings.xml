@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Laboratorio Alchemico</string>
+    <string name="title_activity_main">Laboratorio Alchemico</string>
+    <string name="package_name">it.collana.alchimista</string>
+    <string name="custom_url_scheme">it.collana.alchimista</string>
+</resources>
