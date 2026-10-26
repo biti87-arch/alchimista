@@ -24,7 +24,7 @@ i_bombe = idx('Bombe alchemiche', i_priv)
 i_mut = idx('Mutageni', i_bombe)
 i_vel = idx('Veleni', i_mut)
 i_doti = idx('Doti da alchimista', i_vel)
-i_arch = idx('Archetipi dell’alchimista', i_doti)
+i_arch = idx("Archetipi dell'alchimista", i_doti)
 
 # ---------- tabella di classe ----------
 tab = []

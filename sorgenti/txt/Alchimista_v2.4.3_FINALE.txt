@@ -6,7 +6,7 @@
 
 Alchimista
 Accademie, club e organizzazioni varie
-Vol. 2 — Classi   ·   Revisione 2.4.2
+Vol. 2 — Classi   ·   Revisione 2.4.3
 “E’ solo una punturina Slappen… Fidati, non ti farà nulla. Nulla…”
 − Kriknak Moulder
 
@@ -22,7 +22,6 @@ Elenco dei veleni23
 Doti da alchimista34
 Archetipi dell'alchimista42
 
-Accademie, club e organizzazioni varie
 Alchimista
 “E’ solo una punturina Slappen… Fidati, non ti farà nulla. Nulla…” − Kriknak Moulder.
 Diligenti accademici, sciamani goblin, alchimisti nanici, ingegneri skaven… ogni razza ha imparato a mescolare intrugli e sostanze. Che abbia studiato presso uno dei prestigiosi istituti del mondo, che sia un privato in stretto contatto con altri ricercatori o semplicemente un genio girovago, la reputazione di un’alchimista è seconda solamente al mistero celato dietro la sua professione e ai prodigi che la sua alchimia è in grado di compiere.
@@ -1437,7 +1436,7 @@ Vile (veleni)
 Requisiti: Alchimista tossicologo di 6° livello o alchimista di 10° livello.
 L’alchimista ottiene bonus di +1 ai tiri per colpire quando usa armi avvelenate per attaccare i nemici già ingaggiati in mischia.
 
-Archetipi dell’alchimista
+Archetipi dell'alchimista
 Alchimista metabolico
 Gli alchimisti metabolici creano mutageni molto tossici che mutano il fisico; essi sono in grado di mantenerli all’interno del proprio corpo senza attivarli.
 Percorso specialistico
